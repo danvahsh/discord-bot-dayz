@@ -144,6 +144,7 @@ client.once('clientReady', () => {
     console.log(`Logged in as: ${client.user.tag}`);
     console.log(`Listening on port: ${PORT}`);
     console.log(`Pterodactyl: Bot Started`);
+    console.log(`Servers: ${client.guilds.cache.map(g => `${g.name} (${g.id})`).join(', ') || 'none — bot has not been invited to any server'}`);
     console.log('===================================================');
     updateLeaderboard().catch(console.error);
 });

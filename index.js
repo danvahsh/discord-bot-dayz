@@ -108,6 +108,11 @@ app.post('/kill', (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    if (cause === 'ping') {
+        console.log('[OK] DayZ mod connected successfully — kill tracker is reachable.');
+        return res.sendStatus(200);
+    }
+
     const stats = loadStats();
 
     // Always record the victim's death

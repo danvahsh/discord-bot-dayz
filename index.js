@@ -12,6 +12,15 @@ const PORT              = process.env.BOT_PORT || 3005;
 const STATS_FILE        = path.join(__dirname, 'stats.json');
 const STATE_FILE        = path.join(__dirname, 'bot-state.json');
 
+// ── Logging ────────────────────────────────────────────────────────────────────
+
+function ts() {
+    return new Date().toISOString().replace('T', ' ').slice(0, 19);
+}
+
+function log(msg)   { console.log(`[${ts()}] ${msg}`); }
+function logErr(msg) { console.error(`[${ts()}] ${msg}`); }
+
 // ── Discord client ─────────────────────────────────────────────────────────────
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -74,7 +83,7 @@ function buildEmbed(stats) {
 async function updateLeaderboard() {
     const channel = await client.channels.fetch(CHANNEL_ID).catch(() => null);
     if (!channel) {
-        console.error(`Could not fetch leaderboard channel (ID: ${CHANNEL_ID}) — make sure LEADERBOARD_CHANNEL_ID is set in Pterodactyl's Variables tab and the bot has access to that channel.`);
+        logErr(`Could not fetch leaderboard channel (ID: ${CHANNEL_ID}) — make sure LEADERBOARD_CHANNEL_ID is set in Pterodactyl's Variables tab and the bot has access to that channel.`);
         return;
     }
 
@@ -93,7 +102,7 @@ async function updateLeaderboard() {
 
     const msg = await channel.send({ embeds: [embed] });
     saveState({ leaderboardMessageId: msg.id });
-    console.log(`Leaderboard message created: ${msg.id}`);
+    log(`Leaderboard message created: ${msg.id}`);
 }
 
 // ── HTTP server (receives events from DayZ mod) ────────────────────────────────
@@ -105,11 +114,12 @@ app.post('/kill', (req, res) => {
     const { apiKey, killerName, killerId, victimName, victimId, cause } = req.body;
 
     if (API_KEY && apiKey !== API_KEY) {
+        logErr('Unauthorized kill event received — API key mismatch.');
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
     if (cause === 'ping') {
-        console.log('[OK] DayZ mod connected successfully — kill tracker is reachable.');
+        log('[OK] DayZ mod connected successfully — kill tracker is reachable.');
         return res.sendStatus(200);
     }
 
@@ -132,7 +142,7 @@ app.post('/kill', (req, res) => {
     saveStats(stats);
 
     if (client.isReady()) {
-        updateLeaderboard().catch(console.error);
+        updateLeaderboard().catch(err => logErr(`Failed to update leaderboard: ${err.message}`));
     }
 
     res.sendStatus(200);
@@ -140,18 +150,18 @@ app.post('/kill', (req, res) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-app.listen(PORT, () => console.log(`Kill tracker listening on port ${PORT}`));
+app.listen(PORT, () => log(`Kill tracker listening on port ${PORT}`));
 
 // ── Discord login ──────────────────────────────────────────────────────────────
 
 client.once('clientReady', () => {
-    console.log('========== DAYZ LEADERBOARD BOT STARTED ==========');
-    console.log(`Logged in as: ${client.user.tag}`);
-    console.log(`Listening on port: ${PORT}`);
-    console.log(`Pterodactyl: Bot Started`);
-    console.log(`Servers: ${client.guilds.cache.map(g => `${g.name} (${g.id})`).join(', ') || 'none — bot has not been invited to any server'}`);
-    console.log('===================================================');
-    updateLeaderboard().catch(console.error);
+    log('========== DAYZ LEADERBOARD BOT STARTED ==========');
+    log(`Logged in as: ${client.user.tag}`);
+    log(`Listening on port: ${PORT}`);
+    log(`Pterodactyl: Bot Started`);
+    log(`Servers: ${client.guilds.cache.map(g => `${g.name} (${g.id})`).join(', ') || 'none — bot has not been invited to any server'}`);
+    log('===================================================');
+    updateLeaderboard().catch(err => logErr(`Failed to update leaderboard: ${err.message}`));
 });
 
 client.login(DISCORD_TOKEN);

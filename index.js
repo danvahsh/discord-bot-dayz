@@ -74,7 +74,7 @@ function buildEmbed(stats) {
 async function updateLeaderboard() {
     const channel = await client.channels.fetch(CHANNEL_ID).catch(() => null);
     if (!channel) {
-        console.error('Could not fetch leaderboard channel — check LEADERBOARD_CHANNEL_ID in .env');
+        console.error(`Could not fetch leaderboard channel (ID: ${CHANNEL_ID}) — make sure LEADERBOARD_CHANNEL_ID is set in Pterodactyl's Variables tab and the bot has access to that channel.`);
         return;
     }
 
@@ -139,7 +139,7 @@ app.listen(PORT, () => console.log(`Kill tracker listening on port ${PORT}`));
 
 // ── Discord login ──────────────────────────────────────────────────────────────
 
-client.once('ready', () => {
+client.once('clientReady', () => {
     console.log('========== DAYZ LEADERBOARD BOT STARTED ==========');
     console.log(`Logged in as: ${client.user.tag}`);
     console.log(`Listening on port: ${PORT}`);

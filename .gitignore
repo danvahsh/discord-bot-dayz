@@ -1,0 +1,6 @@
+node_modules/
+.env
+bot-state.json
+logs/
+*.log
+*example*

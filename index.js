@@ -140,7 +140,11 @@ app.listen(PORT, () => console.log(`Kill tracker listening on port ${PORT}`));
 // ── Discord login ──────────────────────────────────────────────────────────────
 
 client.once('ready', () => {
-    console.log(`Discord bot ready: ${client.user.tag}`);
+    console.log('========== DAYZ LEADERBOARD BOT STARTED ==========');
+    console.log(`Logged in as: ${client.user.tag}`);
+    console.log(`Listening on port: ${PORT}`);
+    console.log(`Pterodactyl: Bot Started`);
+    console.log('===================================================');
     updateLeaderboard().catch(console.error);
 });
 
